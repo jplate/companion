@@ -22,7 +22,7 @@ There is no build system, no framework, no server. Open the file in a browser (o
 
 ## Deployment
 
-This file is a **Claude artifact** created with Claude Fable 5, intended to be run on claude.ai. When opened there, claude.ai automatically supplies the user's API key, which is why the `api()` function has no `x-api-key` header. Users need a Claude account. The model is `claude-sonnet-4-20250514`.
+This file is a **Claude artifact** created with Claude Fable 5 (and modified by JP), intended to be run on claude.ai. When opened there, claude.ai automatically supplies the user's API key, which is why the `api()` function has no `x-api-key` header. Users need a Claude account. The model is `claude-sonnet-4-20250514`.
 
 ## Theming
 

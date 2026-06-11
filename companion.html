@@ -151,7 +151,9 @@ h1.site-title{
 }
 .paper summary::before{content:"§ "}
 .paper summary::-webkit-details-marker{display:none}
-.paper .toc{margin:7px 0 2px;padding:0;list-style:none}
+.paper .toc-wrap{display:grid;grid-template-rows:0fr;overflow:hidden;transition:grid-template-rows .2s ease-in-out}
+.paper details.is-open .toc-wrap{grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(0,0,0.2,1)}
+.paper .toc{min-height:0;margin:7px 0 2px;padding:0;list-style:none}
 .paper .toc li{font-size:12.5px;color:var(--fg-soft);padding:1.5px 0;line-height:1.4}
 .paper .toc li.sub{padding-left:16px;color:var(--fg-faint)}
 .paper .toc .secno{font-family:var(--mono);font-size:10.5px;color:var(--link);margin-right:6px}
@@ -215,7 +217,7 @@ h1.site-title{
 .quill{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--link);
   animation:pulse 1.1s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
-@media (prefers-reduced-motion:reduce){.quill{animation:none}}
+@media (prefers-reduced-motion:reduce){.quill{animation:none}.paper .toc-wrap{transition:none}}
 
 .errcard{border:1px solid var(--errline);background:var(--errbg);border-radius:6px;padding:14px 18px;font-size:14.5px;color:var(--err)}
 .errcard button{font:inherit;font-family:var(--mono);font-size:12px;margin-top:8px;cursor:pointer;
@@ -514,8 +516,22 @@ function renderRail(){
       </button>
       <div class="paper-venue">${esc(p.venue)}</div>
       <div class="paper-blurb">${esc(p.blurb)}</div>
-      <details><summary>contents</summary><ul class="toc">${tocItems}</ul></details>`;
+      <details><summary>contents</summary><div class="toc-wrap"><ul class="toc">${tocItems}</ul></div></details>`;
     li.querySelector('.paper-head').addEventListener('click', () => togglePin(p.id));
+    const det = li.querySelector('details');
+    det.querySelector('summary').addEventListener('click', e => {
+      e.preventDefault();
+      const wrap = det.querySelector('.toc-wrap');
+      if (det.open) {
+        det.classList.remove('is-open');
+        const hide = () => det.removeAttribute('open');
+        wrap.addEventListener('transitionend', hide, { once: true });
+        setTimeout(hide, 250);
+      } else {
+        det.open = true;
+        requestAnimationFrame(() => requestAnimationFrame(() => det.classList.add('is-open')));
+      }
+    });
     ul.appendChild(li);
   });
   renderTocMath(ul);
@@ -585,7 +601,16 @@ function buildSystem(ids){
     const p = byId(id);
     return `<paper id="${p.id}" title="${p.title}" venue="${p.venue}">\nTABLE OF CONTENTS: ${tocOf(p).join(' · ')}\n\n${p.text}\n</paper>`;
   }).join('\n\n');
-  return `You are the reading companion on the academic website of Jan Plate, a philosopher working on metaphysics, type theory, and the logic of properties and relations. Below is the full LaTeX source of ${ids.length === 1 ? 'one of his papers' : 'two of his papers'}. Visitors ask questions; you answer from the text.
+  return `You are the reading companion on the academic website of Jan Plate, a philosopher working on metaphysics, in particular the metaphysics of properties, relations, and states of affairs. Below is the full LaTeX source of ${ids.length === 1 ? 'one of his papers' : 'two of his papers'}. Visitors ask questions; you answer from the text.
+
+Be aware that there are six papers in total, with the following titles and publication venues:
+- 'Logically Simple Properties and Relations', Philosophers' Imprint (2016)
+- 'Intrinsic Properties and Relations', Inquiry (2018)
+- 'Qualitative Properties and Relations', Philosophical Studies (2022)
+- 'Quo Vadis, Metaphysics of Relations?', Dialectica (2022; introduction to a special issue)
+- 'Ordinal Type Theory', Inquiry (2025)
+- 'Towards an Ontology of Roles and States', Erkenntnis (forthcoming; published online 2026)
+Be also aware that the reader might use abbreviations for the titles, e.g., 'LSPR' for 'Logically Simple Properties and Relations', 'IPR' for 'Intrinsic Properties and Relations', 'QPR' for 'Qualitative Properties and Relations', 'Quo Vadis' for 'Quo Vadis, Metaphysics of Relations?', 'OTT' for 'Ordinal Type Theory', and 'TORS' for 'Towards an Ontology of Roles and States'. They might also use 'STT' for 'Simple Type Theory', a system that OTT provides an alternative to.
 
 How to answer:
 - Ground everything in the source. Cite sections inline like (§5.4)${ids.length > 1 ? ', naming the paper when more than one is in play' : ''}. Never invent section numbers: check them against the table of contents.
